@@ -2,24 +2,21 @@ module github.com/restlesswhy/eth-balance-searcher
 
 go 1.18
 
-require github.com/spf13/viper v1.13.0
+require (
+	github.com/spf13/viper v1.13.0
+	github.com/ybbus/jsonrpc/v3 v3.1.1
+)
 
 require (
-	github.com/allegro/bigcache v1.2.1 // indirect
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/go-stack/stack v1.8.1 // indirect
-	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
 	github.com/klauspost/compress v1.15.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/syndtr/goleveldb v1.0.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.40.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
-	github.com/ybbus/jsonrpc/v3 v3.1.1 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
-	golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4 // indirect
 )
 
 require (
@@ -39,7 +36,6 @@ require (
 	github.com/stretchr/testify v1.8.0
 	github.com/subosito/gotenv v1.4.1 // indirect
 	github.com/ubiq/go-ubiq v3.0.1+incompatible
-	github.com/ybbus/jsonrpc v2.1.2+incompatible
 	go.uber.org/zap v1.23.0
 	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
 	golang.org/x/text v0.3.7 // indirect

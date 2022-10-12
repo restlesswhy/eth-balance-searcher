@@ -43,68 +43,60 @@ func (s *service) GetAddress(ctx context.Context) (string, error) {
 		return "", errors.Wrap(err, "get sequence error")
 	}
 
-	type asd struct {
-		wg sync.WaitGroup
-		mu sync.Mutex
-		ma map[string]*big.Int
-	}
+	data := models.NewSearchData()
 
-	aas := asd{
-		ma: make(map[string]*big.Int),
-		wg: sync.WaitGroup{},
-	}
-
+	wg := sync.WaitGroup{}
+	wg.Add(len(seq))
 	for _, i := range seq {
-		aas.wg.Add(1)
 		go func(d uint64) {
-			defer aas.wg.Done()
+			defer wg.Done()
+			
 			block, err := s.client.GetBlockByNumber(ctx, utils.UInt64ToHex(d))
 			if err != nil {
 				s.log.Error(err)
+				return
 			}
 
 			for _, v := range block.Transactions {
 				val, err := utils.BigIntFromHex(v.Value)
 				if err != nil {
-					log.Fatal(err)
+					s.log.Error(err)
 					continue
 				}
 
-				aas.mu.Lock()
-				if from, ok := aas.ma[v.From]; !ok {
+				if from, ok := data.Get(v.From); !ok {
 					res := new(big.Int)
 					res.Sub(res, val)
-					aas.ma[v.From] = res
+					data.Set(v.From, res)
 				} else {
 					res := new(big.Int)
 					res.Sub(from, val)
-					aas.ma[v.From] = res
+					data.Set(v.From, res)
 				}
 
-				if to, ok := aas.ma[v.To]; !ok {
-					aas.ma[v.To] = val
+				if to, ok := data.Get(v.To); !ok {
+					data.Set(v.To, val)
 				} else {
 					res := new(big.Int)
 					res.Add(to, val)
-					aas.ma[v.From] = res
+					data.Set(v.To, res)
 				}
-				aas.mu.Unlock()
 			}
 		}(i)
 	}
-	aas.wg.Wait()
+	wg.Wait()
 
-	as := new(big.Int)
-	ag := ""
-	for k, v := range aas.ma {
-		if v.CmpAbs(as) == 1 {
-			as = v
-			ag = k
+	largerValue := new(big.Int)
+	address := ""
+	for k, v := range data.GetAll() {
+		if v.CmpAbs(largerValue) == 1 {
+			largerValue = v
+			address = k
 		}
 	}
 
-	fmt.Println(as.String())
-	return ag, nil
+	fmt.Println(largerValue.String())
+	return address, nil
 }
 
 func (s *service) GetAddress1(ctx context.Context) (string, error) {
