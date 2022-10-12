@@ -1,10 +1,6 @@
 FROM golang:1.18 AS builder
 WORKDIR /go/src/github.com/restlesswhy/eth-balance-searcher/
 
-#COPY go.mod ./
-#COPY go.sum ./
-#RUN go mod download
-
 COPY . ./
 RUN go mod download
 

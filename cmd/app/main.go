@@ -1,17 +1,19 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
 	"github.com/restlesswhy/eth-balance-searcher/config"
 	"github.com/restlesswhy/eth-balance-searcher/internal/server"
 	"github.com/restlesswhy/eth-balance-searcher/pkg/logger"
+	"github.com/restlesswhy/eth-balance-searcher/pkg/redis"
 )
 
 // @title ETH balance searcher
 // @version 2.0
-// @description Service 
+// @description Service
 
 // @contact.name German Generalov
 // @contact.url http://github.com/restlesswhy
@@ -30,12 +32,17 @@ func main() {
 		log.Fatal(err)
 	}
 
+	redis, err := redis.New(cfg, context.Background())
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	appLogger := logger.NewAppLogger(cfg.Logger)
 	appLogger.InitLogger()
 	appLogger.Named(fmt.Sprintf(`(%s)`, cfg.ServiceName))
 	appLogger.Infof("CFG: %+v", cfg)
 
-	if err := server.New(appLogger, cfg).Run(); err != nil {
+	if err := server.New(appLogger, cfg, redis).Run(); err != nil {
 		appLogger.Fatal(err)
 	}
 }

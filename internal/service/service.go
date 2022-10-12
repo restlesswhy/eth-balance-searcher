@@ -18,13 +18,19 @@ type GetBlockRPC interface {
 	GetBlockByNumber(ctx context.Context, number string) (*models.Block, error)
 }
 
+type Cache interface {
+	Get(ctx context.Context, key string, dest interface{}) (bool, error)
+	Set(ctx context.Context, key string, value interface{}) error
+}
+
 type service struct {
 	log    logger.Logger
 	client GetBlockRPC
+	cache  Cache
 }
 
-func New(log logger.Logger, client GetBlockRPC) *service {
-	return &service{log: log, client: client}
+func New(log logger.Logger, client GetBlockRPC, cache Cache) *service {
+	return &service{log: log, client: client, cache: cache}
 }
 
 func (s *service) GetAddress(ctx context.Context) (string, error) {
@@ -50,11 +56,24 @@ func (s *service) GetAddress(ctx context.Context) (string, error) {
 	for _, i := range seq {
 		go func(d uint64) {
 			defer wg.Done()
-			
-			block, err := s.client.GetBlockByNumber(ctx, utils.UInt64ToHex(d))
+			hexNum := utils.UInt64ToHex(d)
+
+			block := &models.Block{}
+			exist, err := s.cache.Get(ctx, hexNum, block)
 			if err != nil {
-				s.log.Error(err)
-				return
+				s.log.Warn(err)
+			}
+			
+			if !exist {
+				block, err = s.client.GetBlockByNumber(ctx, hexNum)
+				if err != nil {
+					s.log.Error(err)
+					return
+				}
+
+				if err := s.cache.Set(ctx, hexNum, block); err != nil {
+					s.log.Warn(err)
+				}
 			}
 
 			for _, v := range block.Transactions {
@@ -95,7 +114,7 @@ func (s *service) GetAddress(ctx context.Context) (string, error) {
 		}
 	}
 
-	fmt.Println(largerValue.String())
+	s.log.Infof("largest value - %s", largerValue.String())
 	return address, nil
 }
 

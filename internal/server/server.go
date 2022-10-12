@@ -8,10 +8,12 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/restlesswhy/eth-balance-searcher/config"
 	v1 "github.com/restlesswhy/eth-balance-searcher/internal/delivery/http/v1"
 	"github.com/restlesswhy/eth-balance-searcher/internal/integration/getblock"
 	"github.com/restlesswhy/eth-balance-searcher/internal/service"
+	"github.com/restlesswhy/eth-balance-searcher/internal/store/cache"
 	"github.com/restlesswhy/eth-balance-searcher/pkg/logger"
 
 	"github.com/gofiber/fiber/v2"
@@ -24,10 +26,11 @@ type server struct {
 	log   logger.Logger
 	cfg   *config.Config
 	fiber *fiber.App
+	cache *redis.Client
 }
 
-func New(log logger.Logger, cfg *config.Config) *server {
-	return &server{log: log, cfg: cfg, fiber: fiber.New()}
+func New(log logger.Logger, cfg *config.Config, cache *redis.Client) *server {
+	return &server{log: log, cfg: cfg, fiber: fiber.New(), cache: cache}
 }
 
 func (s *server) Run() error {
@@ -35,8 +38,9 @@ func (s *server) Run() error {
 	defer cancel()
 
 	getBlockRPC := getblock.New(s.cfg)
+	cache := cache.New(s.cache)
 
-	service := service.New(s.log, getBlockRPC)
+	service := service.New(s.log, getBlockRPC, cache)
 	controller := v1.New(s.log, service)
 	controller.SetupRoutes(s.fiber)
 
