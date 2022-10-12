@@ -1,0 +1,7 @@
+serviceName: eth-balance-searcher
+http:
+  port: :8000
+logger:
+  level: debug
+  devMode: false
+  encoder: console
