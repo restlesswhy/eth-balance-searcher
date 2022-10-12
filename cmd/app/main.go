@@ -11,19 +11,6 @@ import (
 	"github.com/restlesswhy/eth-balance-searcher/pkg/redis"
 )
 
-// @title ETH balance searcher
-// @version 2.0
-// @description Service
-
-// @contact.name German Generalov
-// @contact.url http://github.com/restlesswhy
-
-// @license.name Apache 2.0
-// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
-
-// @host localhost:4000
-// @BasePath /api/v1/
-// @schemes http
 func main() {
 	log.Println("Starting microservice")
 

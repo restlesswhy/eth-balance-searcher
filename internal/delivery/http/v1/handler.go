@@ -20,15 +20,6 @@ func New(log logger.Logger, service Service) *handler {
 	return &handler{log: log, service: service}
 }
 
-// GetCurrency godoc
-// @Summary Get currency info
-// @Description send currency symbol, get info
-// @Tags Currency
-// @Accept json
-// @Produce json
-// @Param symbol query string false "Currency identificator"
-// @Success 200 {object} models.Currency
-// @Router /currency [get]
 func (h *handler) getAddress(c *fiber.Ctx) error {
 	currency, err := h.service.GetAddress(c.Context())
 	if err != nil {
